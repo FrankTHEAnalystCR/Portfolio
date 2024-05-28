@@ -1,0 +1,307 @@
+---
+title: "Analisis Exploratorio"
+author: "Gianfranco Giovannini Villalobos y Fiorella Fernandez Calderon"
+date: "2023-11-27"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(dplyr)
+Cleveland <- read.csv('Cleveland_Heart.csv')
+Cleveland$X <- NULL
+library(jmv)
+library(ggplot2)
+library(GGally)
+library(summarytools)
+```
+
+```{r, echo=FALSE, fig.cap="1", out.width = '100%'}
+knitr::include_graphics("fio1.png")
+```
+
+```{r, echo=FALSE, fig.cap="2", out.width = '100%'}
+knitr::include_graphics("fio2.png")
+```
+
+```{r pressure, echo=FALSE, fig.cap="3", out.width = '100%'}
+knitr::include_graphics("fio3.png")
+```
+
+# Analitica descriptiva
+
+En esta seccion vamos a explorar la distribuccion y las variables que nos causaron mayor interes de este dataset.
+
+```{r echo=FALSE}
+jmv::descriptives(
+    data = Cleveland,
+    vars = vars(sex),
+    freq = TRUE,
+    bar = FALSE,
+    mean = FALSE,
+    median = FALSE,
+    sd = FALSE,
+    min = FALSE,
+    max = FALSE)
+summarytools::freq(Cleveland$sex, order = "freq")
+```
+
+En este dataset los hombres superan en numero a las mujeres por un poco mas del doble. Los hombres representan 68% de los datos y las mujeres un 32%.
+
+```{r echo=FALSE}
+ggplot(data=Cleveland, aes(x= sex)) + geom_bar(aes(fill = sex))
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    data = Cleveland,
+    vars = vars(cp),
+    freq = TRUE,
+    bar = FALSE,
+    mean = FALSE,
+    median = FALSE,
+    sd = FALSE,
+    min = FALSE,
+    max = FALSE)
+summarytools::freq(Cleveland$cp, order = "freq")
+```
+
+El dolor de pecho asintomatico es la categoria mas comun, seguida de dolor no angino, angina atipica y angina tipica como la menos comun.
+
+```{r echo=FALSE}
+ggplot(data=Cleveland, aes(x= cp)) + geom_bar(aes(fill = cp))
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = age ~ cp:sex,
+    data = Cleveland,
+    hist = TRUE,
+    dens = TRUE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    skew = TRUE,
+    kurt = TRUE)
+```
+
+En términos generales, podemos observar que las mujeres de la muestra tenían una edad promedio de 55.7 y los hombres una edad promedio de 53.8.
+
+El rango de edades de los pacientes en la muestra va desde 29 hasta los 77 años para los hombres y las mujeres de 34 a 76 años.
+
+Un hecho que se puede observar a simple vista es como la mayoría de los pacientes asintomáticos presentan una edad promedio de 55.1 años para hombres y 57.3 para mujeres. En cuanto a la angina atípica, el promedio de edad entre hombres y mujeres es bastante similar dentro de los 51 años. Para la angina típica se observa una diferencia de edad más marcada entre los sexos, donde los hombres tienen un promedio de edad de 54.3 y las mujeres de 63.3 -casi 10 años de diferencia entre las edades promedio del grupo de pacientes afectado por este padecimiento cardíaco-. Lo mismo para el dolor de pecho no relacionado con angina, en esta categoría los hombres tienen un promedio de edad de 52.8 y las mujeres de 55 años.
+
+Algo que llama mucho la atención en primera instancia del hsitograma es como en la categoría de angina típica se puede observar como el paciente más joven en el grupo masculino tiene una de edad de 34, siendo esto un outlier, mientras que el paciente mas joven en el grupo femenino tiene una de edad de 58. Igualmente, es llamativa la kurtosis promedio que presentan los hombres, siendo negativa en la mayoría de las categorías; siendo la angina atípica, en hombres, la que tiene una kurtosis más cercana a la normal. Estos resultados en la kurtosis nos permiten entender que las anginas típicas y dolores de pecho se presentan en rangos de edades más amplios para los hombres que para las mujeres.
+
+En cuanto a los graficos de QQ la categoria de hombres con un dolor en el pecho de caracter asintomatico es la categoria que presenta lo mas cercano a una distribuccion normal.
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = trestbps ~ sex:cp,
+    data = Cleveland,
+    hist = TRUE,
+    dens = TRUE,
+    box = TRUE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    skew = TRUE,
+    kurt = TRUE,
+    sw = TRUE)
+```
+En cuanto a promedios podemos observar en grupo femenino el promedio mas alto de presion arterial en la categoria angina tipica con un total de 148 mm hg mientras que las demas categorias presenta promedios de 128 y 139 en el caso de los hombres sus promedios se mantiene en un rango bastante cercano de 129 a 139 siendo la categoria angina tipica la mas alta con un total de 139 mm hg dandonos a entender que en promedio los pacientes con una angina tipica tienden en promedio a tener una presion arterial en reposo mas alta.
+
+Analizando los histogramas de las presiones arteriales en reposo, podemos observar que tanto para hombres como para mujeres la mayoría de categorías presentan kurtosis lejanas al promedio, sea positiva o negativa; siendo el grupo de mujeres asintomáticas las que presentan una presión más cercana a una kurtosis normal.
+
+En el grupo de mujeres las categorias de angina atipica y dolor no anginal presentan un desplazamiento que se asemeja mas a la de una distribuccion normal mientras que las otras categorias como asintomatico presentan un desplazamiento positivo muy cercano a 1 y la categoria angina tipica presenta un desplazamiento negativo significativo de -2.  Similarmente, en el grupo de hombres todas las categorias tiene un desplazamiento que se puede considerar normal a excepcion de la categoria angina tipica la cual tiene un desplazamiento positivo de 1.85.
+
+Una observacion relevante es como la presion arterial en la categoria asintomatico del grupo femenino presenta una distribucion mas amplia que el grupo masculino, caso contrario se da en las demas categorias donde el grupo masculino tiene una distribucion mas amplia.
+
+Observando los graficos de caja en la categoria asintomatico del grupo femenino podemos encontrar un paciente con la presion arterial mas alta con un total de 200 mm hg lo cual podria verse como un outlier significativo lo cual explicaria porque la distribuccion femenina es mas amplia que la masculina en esta categoria. Por otra parte se puede observar como en el grupo de hombres en las categorias de angina atipica y dolor no anguinal se encuentran  numerosos outliers con presion alta y baja en relacion a la mayoria de sus datos por categoria. En terminos generales los outliers amplian la distribuccion al mismo tiempo manteniendo una kurtosis positiva.
+
+Basado en las prueba Shapiro-Wilk las categorias angina atipica en hombres y angina tipica en mujeres presentan una distribuccion la cual se se puede asumir basado en los resultados no es normal. Por consiguiente los demas resultados se consideran normales.
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = chol ~ sex:cp,
+    data = Cleveland,
+    hist = TRUE,
+    dens = TRUE,
+    box = TRUE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    skew = TRUE,
+    kurt = TRUE,
+    sw = TRUE)
+```
+En promedio las mujeres presentan un nivel mas alto de colesterol.
+
+observando el grafico de vemos que debido a un outlier en la categoria de dolor no anginal en el grupo femenino podemos ver que amplia o desplaza el data set considerablemente como tal se puede ver que en esta categoria presentamos dos individuos con un muy alto nivel de colesterol con 564. Este mismo escenarion se da en la categoria dolor no anginal en hombres donde el desplazamiento no es tan pronunciado y en esta categoria se encuentra el individuo con el colesterol mas bajo con 126.
+
+Tanto para hombres como para mujeres la angina atipica presenta una distribuccion normal basado en la prueba shapiro-Wilk asi como el grupo de hombres asintomaticos. En cuanto las demas categorias todas presentan una distribuccion que basado en la prueba se asume es anormal.
+
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = thalach ~ cp:sex,
+    data = Cleveland,
+    hist = TRUE,
+    dens = TRUE,
+    box = TRUE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    skew = TRUE,
+    kurt = TRUE,
+    sw = TRUE)
+```
+La categoria con el ritmo cardiaco mas alto es angina atipica con un ritmo cardiaco de 163 para mujeres y 162 para hombres. Seguido de las categorias angina tipica y dolor no anginal las cuales presentan promedios muy similares con un rango 150-158 y la categoria asintomatico tiene los promedios mas bajos para hombres y mujeres con 139 y 146 respectivamente. 
+
+Según el histograma presentado, podemos observar un desplazamiento negativo -hacia la derecha-; esto lo confirman los datos del skewness donde se muestran todos los datos negativos en todas las categorías, tanto para hombres como para mujeres.
+
+ En cuanto a la kurtosis, la única cercana a una distribución normal es la que presenta el dolor no anginal en hombres. Demostrando anormalidad en la distribución de todas las demás categorías, para hombres y mujeres.
+
+Como lo mencionamos anteriormente, esta ausencia de normalidad puede deberse, en algunas de las categorías, a los outliers presentes en los datos.
+
+Observando el grafico de cajas podemos notar que a pesar de la categoria asintomatica del grupo hombres tener una distribuccion de las mas cercanas a normal el outlier del individuo con 71 latidos por minuto esta afectando la normalidad de la distribuccion. La categoria angina atipica presenta varios outliers en ambos grupos en esta categoria tambien se encuentra el paciente con el mayor numero de latidos con un total de 202 al igual que la categoria de dolor no anginal la cual presenta outliers en sus rangos mas bajos.
+
+Como lo mencionamos anteriormente, esta ausencia de normalidad puede deberse, en algunas de las categorías, a los outliers presentes en los datos. La unica categoria la cual presental lo mas cercano a normalidad es la categoria de dolor no angino basado en Shapiro-Wilk y demas pruebas.
+
+# Otras variables
+
+En esta seccion mostramos otras variables del dataset que desafortunadamente no fueron de mucha relevancia para nuestro analisis pero que de igual forma merecen ser observadas e illustradas.
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = thal ~ sex:cp,
+    data = Cleveland,
+    freq = TRUE,
+    bar = FALSE,
+    mean = FALSE,
+    median = FALSE,
+    sd = FALSE,
+    min = FALSE,
+    max = FALSE)
+ggplot(data=Cleveland, aes(x= thal)) + geom_bar(aes(fill = thal)) +
+  facet_grid(.~sex~cp)
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = fbs ~ sex:cp,
+    data = Cleveland,
+    hist = TRUE,
+    dens = TRUE,
+    bar = TRUE,
+    boxLabelOutliers = FALSE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    variance = TRUE,
+    skew = TRUE,
+    kurt = TRUE)
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = restecg ~ sex:cp,
+    data = Cleveland,
+    hist = TRUE,
+    dens = TRUE,
+    bar = TRUE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    variance = TRUE,
+    skew = TRUE,
+    kurt = TRUE)
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = exang ~ sex:cp,
+    data = Cleveland,
+    bar = FALSE,
+    missing = FALSE,
+    mode = TRUE,
+    variance = TRUE,
+    skew = TRUE,
+    kurt = TRUE)
+ggplot(data=Cleveland, aes(x= exang)) + geom_bar(aes(fill = exang)) +
+  facet_grid(.~sex~cp)
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = slope ~ sex:cp,
+    data = Cleveland,
+    freq = TRUE,
+    hist = TRUE,
+    dens = TRUE,
+    bar = TRUE,
+    box = TRUE,
+    qq = TRUE,
+    missing = FALSE,
+    mode = TRUE,
+    variance = TRUE,
+    skew = TRUE,
+    kurt = TRUE)
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = ca ~ sex:cp,
+    data = Cleveland,
+    freq = TRUE,
+    bar = FALSE,
+    missing = FALSE,
+    mean = FALSE,
+    median = FALSE,
+    sd = FALSE,
+    min = FALSE,
+    max = FALSE)
+ggplot(data=Cleveland, aes(x= ca)) + geom_bar(aes(fill = ca)) +
+  facet_grid(.~sex~cp)
+```
+
+```{r echo=FALSE}
+jmv::descriptives(
+    formula = sex ~ cp:num,
+    data = Cleveland,
+    freq = TRUE,
+    bar = FALSE,
+    missing = FALSE,
+    mean = FALSE,
+    median = FALSE,
+    sd = FALSE,
+    min = FALSE,
+    max = FALSE)
+ggplot(data=Cleveland, aes(x= num)) + geom_bar() +
+  facet_grid(.~sex~cp)
+```
+
+```{r echo=FALSE}
+ggplot(data=Cleveland, aes(x=sex, y=num)) + geom_point() +
+  facet_grid(.~cp)
+```
+
+```{r echo=FALSE}
+library(ggplot2)
+library(GGally)
+```
+
+```{r echo=FALSE}
+Cleveland <- Cleveland %>% select(trestbps, chol, thalach, num, everything())
+```
+
+```{r echo=FALSE}
+ggpairs(Cleveland[1:3]) 
+```
+
+Utilizamos la funcion ggpairs para buscar si habia alguna correlacion entre las diferentes variables numericas mas no encontramos ninguna a pesar de nuestras previas asumpciones de que entre mas alto el colesterol asi seria la presion arterial o entre mas alto el ritmo cardiaco mas alto la presion arterial estas ideas fueron desmentidas por los graficos ya presentados demonstrando efectivamente una carencia de correlacion entre las variables.
+
+## Bibliografía
+
+Detrano, R.; Janosi, A.; Pfisterer, M.; Steinbrunn, W. (30 de junio, 1988). Heart Disease [Dataset]. <https://archive.ics.uci.edu/dataset/45/heart+disease>
+
